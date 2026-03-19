@@ -1,0 +1,241 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CEFR_LEVEL {
+  A1
+  A2
+  B1
+  B2
+  C1
+  C2
+}
+
+enum ACCOUNT_STATUS {
+  active
+  suspended
+  deleted
+}
+
+enum SCENARIO_CATEGORY {
+  daily_conversation
+  business
+  travel
+  social
+  interview
+  academic
+}
+
+model User {
+  id                 String           @id @default(uuid())
+  email              String           @unique
+  passwordHash       String           @map("password_hash")
+  displayName        String           @map("display_name")
+  avatarUrl          String?          @map("avatar_url")
+  nativeLanguage     String           @default("zh-CN") @map("native_language")
+  currentProficiency CEFR_LEVEL       @default(A1) @map("current_proficiency")
+  accountStatus      ACCOUNT_STATUS   @default(active) @map("account_status")
+  emailVerified      Boolean          @default(false) @map("email_verified")
+  lastActiveAt       DateTime?        @map("last_active_at")
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+
+  learningProfile  UserLearningProfile?
+  progress        UserProgress[]
+  recordings      VoiceRecording[]
+  sessions       LearningSession[]
+  achievements    UserAchievement[]
+  subscription    Subscription?
+
+  @@map("users")
+}
+
+model UserLearningProfile {
+  id                        String   @id @default(uuid())
+  userId                    String   @unique @map("user_id")
+  user                      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  preferredSessionDuration  Int      @default(15) @map("preferred_session_duration")
+  dailyGoalMinutes          Int      @default(15) @map("daily_goal_minutes")
+  notificationEnabled       Boolean  @default(true) @map("notification_enabled")
+  reminderTime              String?  @map("reminder_time")
+  learningGoals             Json     @default("[]") @map("learning_goals")
+  targetProficiency         CEFR_LEVEL? @map("target_proficiency")
+  targetAchievementDate     DateTime? @map("target_achievement_date")
+  accessibilityPreferences  Json     @default("{}") @map("accessibility_preferences")
+  createdAt                 DateTime @default(now()) @map("created_at")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
+
+  @@map("user_learning_profiles")
+}
+
+model Scenario {
+  id          String           @id @default(uuid())
+  title       String
+  description String
+  category    SCENARIO_CATEGORY
+  difficulty  CEFR_LEVEL
+  locale      String           @default("en-US")
+  thumbnailUrl String?         @map("thumbnail_url")
+  estimatedMinutes Int          @default(10) @map("estimated_minutes")
+  isActive    Boolean          @default(true) @map("is_active")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  dialogues   Dialogue[]
+  vocabulary  Vocabulary[]
+  progress    UserProgress[]
+
+  @@map("scenarios")
+}
+
+model Dialogue {
+  id          String   @id @default(uuid())
+  scenarioId  String   @map("scenario_id")
+  scenario    Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  title       String
+  displayOrder Int     @map("display_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  turns       DialogueTurn[]
+
+  @@map("dialogues")
+}
+
+model DialogueTurn {
+  id              String   @id @default(uuid())
+  dialogueId      String   @map("dialogue_id")
+  dialogue        Dialogue @relation(fields: [dialogueId], references: [id], onDelete: Cascade)
+  turnOrder       Int      @map("turn_order")
+  speakerType     String   @map("speaker_type")
+  characterId     String?  @map("character_id")
+  character       Character? @relation(fields: [characterId], references: [id])
+  content         String
+  contentType     String   @default("text") @map("content_type")
+  audioUrl        String?  @map("audio_url")
+  hints           Json     @default("[]")
+  idealResponse   String?  @map("ideal_response")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@map("dialogue_turns")
+}
+
+model Character {
+  id        String   @id @default(uuid())
+  name      String
+  role      String
+  avatarUrl String?  @map("avatar_url")
+  voiceId   String?  @map("voice_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  turns     DialogueTurn[]
+
+  @@map("characters")
+}
+
+model Vocabulary {
+  id          String   @id @default(uuid())
+  scenarioId  String   @map("scenario_id")
+  scenario    Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  word        String
+  phonetic    String?
+  translation String
+  audioUrl    String?  @map("audio_url")
+  difficulty  CEFR_LEVEL
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("vocabulary")
+}
+
+model UserProgress {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenarioId      String   @map("scenario_id")
+  scenario        Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  completedDialogues Int   @default(0) @map("completed_dialogues")
+  totalDialogues  Int      @map("total_dialogues")
+  bestScore       Int?     @map("best_score")
+  attempts        Int      @default(0)
+  lastPracticedAt DateTime? @map("last_practiced_at")
+  completedAt     DateTime? @map("completed_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, scenarioId])
+  @@map("user_progress")
+}
+
+model VoiceRecording {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId   String?  @map("session_id")
+  turnId      String?  @map("turn_id")
+  audioUrl    String   @map("audio_url")
+  durationMs  Int      @map("duration_ms")
+  score       Int?
+  transcript  String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("voice_recordings")
+}
+
+model LearningSession {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenarioId  String?  @map("scenario_id")
+  startedAt   DateTime @default(now()) @map("started_at")
+  completedAt DateTime? @map("completed_at")
+  durationSec Int?     @map("duration_sec")
+  turnsCount  Int      @default(0) @map("turns_count")
+
+  @@map("learning_sessions")
+}
+
+model Achievement {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  title       String
+  description String
+  iconUrl     String?  @map("icon_url")
+  points      Int      @default(0)
+  criteria    Json
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  users       UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            String      @id @default(uuid())
+  userId        String      @map("user_id")
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId String      @map("achievement_id")
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  earnedAt      DateTime    @default(now()) @map("earned_at")
+
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
+}
+
+model Subscription {
+  id              String   @id @default(uuid())
+  userId          String   @unique @map("user_id")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier            String   @default("free")
+  status          String   @default("active")
+  currentPeriodStart DateTime @map("current_period_start")
+  currentPeriodEnd   DateTime @map("current_period_end")
+  cancelAtPeriodEnd   Boolean @default(false) @map("cancel_at_period_end")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("subscriptions")
+}

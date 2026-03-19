@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.build/
+*.tsbuildinfo
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Test coverage
+coverage/
+
+# Docker
+docker-compose.override.yml
+
+# Turbopack
+.turbo/
+
+# Build artifacts
+apps/*/dist/
+apps/*/.expo/
+apps/*/node_modules/
+
+# MinIO data
+.minio/
+
+# PostgreSQL data (local dev)
+.postgres/
