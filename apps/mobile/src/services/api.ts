@@ -93,6 +93,51 @@ export const api = {
 
   analyzeSpeech: (expectedText: string, transcript: string) =>
     client.post('/recordings/analyze', { expectedText, transcript }).then((res) => res.data),
+
+  getVideos: (params?: { difficulty?: string; page?: number; limit?: number }) =>
+    client.get('/videos', { params }).then((res) => res.data),
+
+  getVideo: (id: string) => client.get(`/videos/${id}`).then((res) => res.data),
+
+  createChatbotConversation: (scenarioId?: string, title?: string) =>
+    client.post('/chatbot/conversations', { scenarioId, title }).then((res) => res.data),
+
+  getChatbotConversations: () =>
+    client.get('/chatbot/conversations').then((res) => res.data),
+
+  getChatbotConversation: (id: string) =>
+    client.get(`/chatbot/conversations/${id}`).then((res) => res.data),
+
+  sendChatbotMessage: (conversationId: string, content: string, audioUrl?: string) =>
+    client.post(`/chatbot/conversations/${conversationId}/messages`, { content, audioUrl }).then((res) => res.data),
+
+  deleteChatbotConversation: (id: string) =>
+    client.delete(`/chatbot/conversations/${id}`).then((res) => res.data),
+
+  getFriends: () => client.get('/social/friends').then((res) => res.data),
+
+  getFriendRequests: () => client.get('/social/friends/requests').then((res) => res.data),
+
+  sendFriendRequest: (userId: string) =>
+    client.post(`/social/friends/request/${userId}`).then((res) => res.data),
+
+  acceptFriendRequest: (userId: string) =>
+    client.post(`/social/friends/accept/${userId}`).then((res) => res.data),
+
+  declineFriendRequest: (userId: string) =>
+    client.post(`/social/friends/decline/${userId}`).then((res) => res.data),
+
+  removeFriend: (userId: string) =>
+    client.delete(`/social/friends/${userId}`).then((res) => res.data),
+
+  getLeaderboard: (limit?: number) =>
+    client.get('/social/leaderboard', { params: { limit } }).then((res) => res.data),
+
+  shareProgress: (scenarioId: string, score?: number, note?: string) =>
+    client.post(`/social/share/${scenarioId}`, { score, note }).then((res) => res.data),
+
+  getSharedProgress: (scenarioId: string) =>
+    client.get(`/social/share/${scenarioId}`).then((res) => res.data),
 };
 
 export default api;

@@ -17,6 +17,9 @@ import { vocabularyRouter } from './routes/vocabulary';
 import { characterRouter } from './routes/characters';
 import { recordingRouter } from './routes/recordings';
 import { homeRouter } from './routes/home';
+import { videoRouter } from './routes/videos';
+import { chatbotRouter } from './routes/chatbot';
+import { socialRouter } from './routes/social';
 
 const app = express();
 const httpServer = createServer(app);
@@ -61,6 +64,9 @@ app.use('/api/v1/vocabulary', vocabularyRouter);
 app.use('/api/v1/characters', characterRouter);
 app.use('/api/v1/recordings', recordingRouter);
 app.use('/api/v1/home', homeRouter);
+app.use('/api/v1/videos', videoRouter);
+app.use('/api/v1/chatbot', chatbotRouter);
+app.use('/api/v1/social', socialRouter);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

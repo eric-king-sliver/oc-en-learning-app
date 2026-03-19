@@ -51,6 +51,11 @@ model User {
   sessions       LearningSession[]
   achievements    UserAchievement[]
   subscription    Subscription?
+  friendsInitiated Friend[] @relation("FriendRequester")
+  friendsReceived Friend[] @relation("FriendAddressee")
+  sharedProgress  SharedProgress[]
+  offlineContent  OfflineContent[]
+  conversations   ChatbotConversation[]
 
   @@map("users")
 }
@@ -261,4 +266,88 @@ model EmailVerificationToken {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("email_verification_tokens")
+}
+
+model Video {
+  id          String   @id @default(uuid())
+  scenarioId  String?  @map("scenario_id")
+  title       String
+  description String
+  videoUrl    String   @map("video_url")
+  thumbnailUrl String? @map("thumbnail_url")
+  durationSec Int      @default(0) @map("duration_sec")
+  transcript  String?
+  difficulty  CEFR_LEVEL
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("videos")
+}
+
+model ChatbotConversation {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenarioId  String?  @map("scenario_id")
+  title       String
+  context     Json     @default("{}")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  messages    ChatbotMessage[]
+
+  @@map("chatbot_conversations")
+}
+
+model ChatbotMessage {
+  id              String   @id @default(uuid())
+  conversationId  String   @map("conversation_id")
+  conversation    ChatbotConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role            String
+  content         String
+  audioUrl        String?  @map("audio_url")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@map("chatbot_messages")
+}
+
+model Friend {
+  id          String   @id @default(uuid())
+  requesterId String   @map("requester_id")
+  requester   User     @relation("FriendRequester", fields: [requesterId], references: [id])
+  addresseeId String   @map("addressee_id")
+  addressee   User     @relation("FriendAddressee", fields: [addresseeId], references: [id])
+  status      String   @default("pending")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([requesterId, addresseeId])
+  @@map("friends")
+}
+
+model SharedProgress {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenarioId  String   @map("scenario_id")
+  score       Int
+  note        String?
+  isPublic    Boolean  @default(true) @map("is_public")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("shared_progress")
+}
+
+model OfflineContent {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contentType String   @map("content_type")
+  contentId   String   @map("content_id")
+  data        Json
+  downloadedAt DateTime @default(now()) @map("downloaded_at")
+
+  @@unique([userId, contentType, contentId])
+  @@map("offline_content")
 }
