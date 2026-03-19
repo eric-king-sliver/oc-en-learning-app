@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import multer from 'multer';
 import { createServer } from 'http';
 import { swaggerUi } from './utils/swagger';
 import { errorHandler } from './middleware/errorHandler';
@@ -14,9 +15,24 @@ import { sessionRouter } from './routes/sessions';
 import { progressRouter } from './routes/progress';
 import { vocabularyRouter } from './routes/vocabulary';
 import { characterRouter } from './routes/characters';
+import { recordingRouter } from './routes/recordings';
 
 const app = express();
 const httpServer = createServer(app);
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith('audio/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only audio files are allowed'));
+    }
+  },
+});
+
+app.set('upload', upload);
 
 app.use(helmet());
 app.use(cors());
@@ -42,6 +58,7 @@ app.use('/api/v1/sessions', sessionRouter);
 app.use('/api/v1/progress', progressRouter);
 app.use('/api/v1/vocabulary', vocabularyRouter);
 app.use('/api/v1/characters', characterRouter);
+app.use('/api/v1/recordings', recordingRouter);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
