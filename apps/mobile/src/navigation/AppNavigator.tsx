@@ -11,6 +11,10 @@ import { ScenarioListScreen } from '../screens/ScenarioListScreen';
 import { ScenarioDetailScreen } from '../screens/ScenarioDetailScreen';
 import { PlayerScreen } from '../screens/PlayerScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { VideoScreen } from '../screens/VideoScreen';
+import { ChatbotScreen } from '../screens/ChatbotScreen';
+import { SocialScreen } from '../screens/SocialScreen';
+import { OfflineContentScreen } from '../screens/OfflineContentScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -20,6 +24,10 @@ function TabIcon({ name, focused }: { name: string; focused: boolean }) {
     Home: '🏠',
     Learn: '📚',
     Profile: '👤',
+    Videos: '🎬',
+    Chatbot: '🤖',
+    Social: '👥',
+    Offline: '📥',
   };
 
   return (
@@ -52,6 +60,26 @@ function MainTabs() {
         name="Profile"
         component={ProfileScreen}
         options={{ title: 'Profile', tabBarIcon: ({ focused }) => <TabIcon name="Profile" focused={focused} /> }}
+      />
+      <Tab.Screen
+        name="Videos"
+        component={VideoScreen}
+        options={{ title: 'Videos', tabBarIcon: ({ focused }) => <TabIcon name="Videos" focused={focused} /> }}
+      />
+      <Tab.Screen
+        name="Chatbot"
+        component={ChatbotScreen}
+        options={{ title: 'Chatbot', tabBarIcon: ({ focused }) => <TabIcon name="Chatbot" focused={focused} /> }}
+      />
+      <Tab.Screen
+        name="Social"
+        component={SocialScreen}
+        options={{ title: 'Social', tabBarIcon: ({ focused }) => <TabIcon name="Social" focused={focused} /> }}
+      />
+      <Tab.Screen
+        name="Offline"
+        component={OfflineContentScreen}
+        options={{ title: 'Offline', tabBarIcon: ({ focused }) => <TabIcon name="Offline" focused={focused} /> }}
       />
     </Tab.Navigator>
   );
