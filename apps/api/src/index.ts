@@ -16,6 +16,7 @@ import { progressRouter } from './routes/progress';
 import { vocabularyRouter } from './routes/vocabulary';
 import { characterRouter } from './routes/characters';
 import { recordingRouter } from './routes/recordings';
+import { homeRouter } from './routes/home';
 
 const app = express();
 const httpServer = createServer(app);
@@ -59,6 +60,7 @@ app.use('/api/v1/progress', progressRouter);
 app.use('/api/v1/vocabulary', vocabularyRouter);
 app.use('/api/v1/characters', characterRouter);
 app.use('/api/v1/recordings', recordingRouter);
+app.use('/api/v1/home', homeRouter);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
