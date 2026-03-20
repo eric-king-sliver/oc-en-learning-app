@@ -16,6 +16,7 @@ import { ChatbotScreen } from '../screens/ChatbotScreen';
 import { SocialScreen } from '../screens/SocialScreen';
 import { OfflineContentScreen } from '../screens/OfflineContentScreen';
 import { AnalyticsScreen } from '../screens/AnalyticsScreen';
+import { ARScannerScreen } from '../screens/ARScannerScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -30,6 +31,7 @@ function TabIcon({ name, focused }: { name: string; focused: boolean }) {
     Social: '👥',
     Offline: '📥',
     Analytics: '📊',
+    AR: '📷',
   };
 
   return (
@@ -87,6 +89,11 @@ function MainTabs() {
         name="Analytics"
         component={AnalyticsScreen}
         options={{ title: 'Analytics', tabBarIcon: ({ focused }) => <TabIcon name="Analytics" focused={focused} /> }}
+      />
+      <Tab.Screen
+        name="AR"
+        component={ARScannerScreen}
+        options={{ title: 'AR Scan', tabBarIcon: ({ focused }) => <TabIcon name="AR" focused={focused} /> }}
       />
     </Tab.Navigator>
   );

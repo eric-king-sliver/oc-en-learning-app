@@ -23,6 +23,7 @@ import { chatbotRouter } from './routes/chatbot';
 import { socialRouter } from './routes/social';
 import { liveSessionRouter } from './routes/liveSessions';
 import { analyticsRouter } from './routes/analytics';
+import { arScannerRouter } from './routes/arScanner';
 import { initializeSocket } from './socket';
 
 const app = express();
@@ -82,6 +83,7 @@ app.use('/api/v1/chatbot', chatbotRouter);
 app.use('/api/v1/social', socialRouter);
 app.use('/api/v1/live-sessions', liveSessionRouter);
 app.use('/api/v1/analytics', analyticsRouter);
+app.use('/api/v1/ar', arScannerRouter);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

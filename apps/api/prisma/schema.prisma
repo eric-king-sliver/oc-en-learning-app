@@ -89,6 +89,21 @@ enum SKILL_AREA {
   comprehension
 }
 
+enum AR_OBJECT_CATEGORY {
+  animal
+  food
+  vehicle
+  furniture
+  nature
+  household
+  clothing
+  electronics
+  body_parts
+  colors
+  shapes
+  numbers
+}
+
 model User {
   id                 String           @id @default(uuid())
   email              String           @unique
@@ -125,6 +140,14 @@ model User {
   performanceMetrics   PerformanceMetric[]
   recommendations      Recommendation[]
   strengthsWeaknesses UserStrengthWeakness[]
+
+  // AR Scanner Relations
+  scannedObjects       ScannedObject[]
+  scanHistories        ScanHistory[]
+
+  // Token Relations
+  passwordResetTokens    PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
 
   @@map("users")
 }
@@ -545,4 +568,77 @@ model UserStrengthWeakness {
   @@index([skillArea])
   @@index([strength])
   @@map("user_strengths_weaknesses")
+}
+
+// ============================================
+// AR Vocabulary Scanner Models
+// ========================================
+
+model ARObject {
+  id          String            @id @default(uuid())
+  objectName  String            @map("object_name")
+  category    AR_OBJECT_CATEGORY
+  imageUrl    String?           @map("image_url")
+  difficulty  CEFR_LEVEL
+  createdAt   DateTime          @default(now()) @map("created_at")
+
+  vocabularyItems VocabularyItem[]
+  scannedObjects  ScannedObject[]
+  scanHistories   ScanHistory[]
+
+  @@index([category])
+  @@index([difficulty])
+  @@map("ar_objects")
+}
+
+model VocabularyItem {
+  id              String   @id @default(uuid())
+  objectId        String   @map("object_id")
+  object          ARObject @relation(fields: [objectId], references: [id], onDelete: Cascade)
+  word            String
+  phonetic        String?
+  partOfSpeech    String?  @map("part_of_speech")
+  definition      String
+  exampleSentence String?  @map("example_sentence")
+  audioUrl        String?  @map("audio_url")
+  difficulty      CEFR_LEVEL
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  scanHistories ScanHistory[]
+
+  @@index([word])
+  @@index([difficulty])
+  @@map("vocabulary_items")
+}
+
+model ScannedObject {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  objectId    String   @map("object_id")
+  object      ARObject @relation(fields: [objectId], references: [id], onDelete: Cascade)
+  scannedAt   DateTime @default(now()) @map("scanned_at")
+  timesScanned Int     @default(1) @map("times_scanned")
+
+  @@unique([userId, objectId])
+  @@index([userId])
+  @@index([objectId])
+  @@map("scanned_objects")
+}
+
+model ScanHistory {
+  id               String      @id @default(uuid())
+  userId           String      @map("user_id")
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  objectId         String      @map("object_id")
+  object           ARObject    @relation(fields: [objectId], references: [id], onDelete: Cascade)
+  vocabularyItemId String?     @map("vocabulary_item_id")
+  vocabularyItem   VocabularyItem? @relation(fields: [vocabularyItemId], references: [id])
+  scannedAt        DateTime    @default(now()) @map("scanned_at")
+
+  @@index([userId])
+  @@index([objectId])
+  @@index([vocabularyItemId])
+  @@index([scannedAt])
+  @@map("scan_history")
 }

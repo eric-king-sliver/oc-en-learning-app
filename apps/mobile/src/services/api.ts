@@ -149,6 +149,21 @@ export const api = {
 
   getAnalyticsRecommendations: () =>
     client.get('/analytics/recommendations').then((res) => res.data),
+
+  getARVocabulary: (objectLabel: string, category?: string) =>
+    client.get('/ar/vocabulary', { params: { objectLabel, category } }).then((res) => res.data),
+
+  getARHistory: (category?: string) =>
+    client.get('/ar/history', { params: { category } }).then((res) => res.data),
+
+  saveARScan: (vocabularyId: string) =>
+    client.post('/ar/scans', { vocabularyId }).then((res) => res.data),
+
+  deleteARScan: (scanId: string) =>
+    client.delete(`/ar/scans/${scanId}`).then((res) => res.data),
+
+  getARObjectCategories: () =>
+    client.get('/ar/categories').then((res) => res.data),
 };
 
 export default api;
