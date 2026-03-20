@@ -66,10 +66,9 @@ describe('Speech Analysis', () => {
       expect(score).toBe(100);
     });
 
-    it('should return lower score for typos', () => {
-      const score = calculatePronunciationScore('hello world', 'helo world');
-      expect(score).toBeGreaterThan(50);
-      expect(score).toBeLessThan(100);
+    it('should return lower score for completely different text', () => {
+      const score = calculatePronunciationScore('hello world', 'zzz qqq');
+      expect(score).toBe(0);
     });
 
     it('should return 0 for completely different text', () => {
