@@ -194,6 +194,50 @@ Password: Password123!
 - [Component Architecture](./docs/component-architecture.md)
 - [Phase 1 MVP Tasks](./docs/phase1-mvp-tasks.md)
 - [Design Review Summary](./docs/design-review-summary.md)
+- [UAT Test Plan](./docs/uat-test-plan.md)
+
+## Building APK
+
+### Prerequisites
+
+1. Node.js 18+
+2. EAS CLI: `npm install -g eas-cli`
+3. Expo account (for EAS Build)
+
+### Build Commands
+
+```bash
+cd apps/mobile
+
+# Build for Android (APK)
+eas build --platform android --profile preview --non-interactive
+
+# Build for Android (AAB - for Play Store)
+eas build --platform android --profile production --non-interactive
+
+# Build locally
+eas build --platform android --local --profile preview
+```
+
+### APK Location
+
+After build completes, download the APK from:
+1. EAS Dashboard: https://expo.dev/console
+2. Or via CLI: `eas build:list`
+
+### Development Build (Faster Iteration)
+
+For development with hot reload:
+```bash
+npx expo start
+# Scan QR code with Expo Go app
+```
+
+### Configuration
+
+Edit `eas.json` to modify build profiles:
+- `preview`: For internal testing (APK)
+- `production`: For release (AAB)
 
 ## License
 
