@@ -45,6 +45,50 @@ enum MATCH_OUTCOME {
   abandoned
 }
 
+enum METRIC_TYPE {
+  accuracy
+  fluency
+  vocabulary
+  grammar
+  pronunciation
+  listening
+  speaking
+  reading
+  writing
+  comprehension
+  engagement
+  consistency
+}
+
+enum RECOMMENDATION_TYPE {
+  practice
+  review
+  new_content
+  challenge
+  improvement
+  achievement
+  reminder
+}
+
+enum RECOMMENDATION_PRIORITY {
+  low
+  medium
+  high
+  urgent
+}
+
+enum SKILL_AREA {
+  speaking
+  listening
+  reading
+  writing
+  vocabulary
+  grammar
+  pronunciation
+  fluency
+  comprehension
+}
+
 model User {
   id                 String           @id @default(uuid())
   email              String           @unique
@@ -75,6 +119,12 @@ model User {
   matchHistoryAs1 MatchHistory[] @relation("MatchHistoryUser1")
   matchHistoryAs2 MatchHistory[] @relation("MatchHistoryUser2")
   sessionMessages SessionMessage[]
+
+  // Advanced Analytics Relations
+  learningPatterns     LearningPattern[]
+  performanceMetrics   PerformanceMetric[]
+  recommendations      Recommendation[]
+  strengthsWeaknesses UserStrengthWeakness[]
 
   @@map("users")
 }
@@ -425,4 +475,74 @@ model SessionMessage {
   @@index([sessionId])
   @@index([senderId])
   @@map("session_messages")
+}
+
+// ============================================
+// Advanced Analytics Models
+// ============================================
+
+model LearningPattern {
+  id              String     @id @default(uuid())
+  userId          String     @map("user_id")
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skillArea       SKILL_AREA @map("skill_area")
+  proficiencyScore Float     @default(0.0) @map("proficiency_score")
+  practiceCount   Int        @default(0) @map("practice_count")
+  lastPracticed   DateTime?  @map("last_practiced")
+  trend           Float      @default(0.0) // Positive = improving, Negative = declining
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+
+  @@unique([userId, skillArea])
+  @@index([userId])
+  @@index([skillArea])
+  @@map("learning_patterns")
+}
+
+model PerformanceMetric {
+  id          String       @id @default(uuid())
+  userId      String       @map("user_id")
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  metricType  METRIC_TYPE  @map("metric_type")
+  value       Float
+  recordedAt  DateTime     @default(now()) @map("recorded_at")
+
+  @@index([userId])
+  @@index([metricType])
+  @@index([recordedAt])
+  @@map("performance_metrics")
+}
+
+model Recommendation {
+  id          String               @id @default(uuid())
+  userId      String               @map("user_id")
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        RECOMMENDATION_TYPE
+  priority    RECOMMENDATION_PRIORITY @default(medium)
+  content     String
+  isRead      Boolean              @default(false) @map("is_read")
+  createdAt   DateTime             @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([priority])
+  @@map("recommendations")
+}
+
+model UserStrengthWeakness {
+  id          String     @id @default(uuid())
+  userId      String     @map("user_id")
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skillArea   SKILL_AREA @map("skill_area")
+  strength    Boolean    // true = strength, false = weakness
+  score       Float
+  evidence    String?    // JSON string with supporting evidence
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  @@unique([userId, skillArea])
+  @@index([userId])
+  @@index([skillArea])
+  @@index([strength])
+  @@map("user_strengths_weaknesses")
 }

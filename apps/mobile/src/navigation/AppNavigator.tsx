@@ -15,6 +15,7 @@ import { VideoScreen } from '../screens/VideoScreen';
 import { ChatbotScreen } from '../screens/ChatbotScreen';
 import { SocialScreen } from '../screens/SocialScreen';
 import { OfflineContentScreen } from '../screens/OfflineContentScreen';
+import { AnalyticsScreen } from '../screens/AnalyticsScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -28,6 +29,7 @@ function TabIcon({ name, focused }: { name: string; focused: boolean }) {
     Chatbot: '🤖',
     Social: '👥',
     Offline: '📥',
+    Analytics: '📊',
   };
 
   return (
@@ -80,6 +82,11 @@ function MainTabs() {
         name="Offline"
         component={OfflineContentScreen}
         options={{ title: 'Offline', tabBarIcon: ({ focused }) => <TabIcon name="Offline" focused={focused} /> }}
+      />
+      <Tab.Screen
+        name="Analytics"
+        component={AnalyticsScreen}
+        options={{ title: 'Analytics', tabBarIcon: ({ focused }) => <TabIcon name="Analytics" focused={focused} /> }}
       />
     </Tab.Navigator>
   );

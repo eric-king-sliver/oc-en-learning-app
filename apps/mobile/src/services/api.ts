@@ -138,6 +138,17 @@ export const api = {
 
   getSharedProgress: (scenarioId: string) =>
     client.get(`/social/share/${scenarioId}`).then((res) => res.data),
+
+  getAnalyticsOverview: () => client.get('/analytics/overview').then((res) => res.data),
+
+  getAnalyticsPerformance: (params?: { period?: string }) =>
+    client.get('/analytics/performance', { params }).then((res) => res.data),
+
+  getAnalyticsStrengthsWeaknesses: () =>
+    client.get('/analytics/strengths-weaknesses').then((res) => res.data),
+
+  getAnalyticsRecommendations: () =>
+    client.get('/analytics/recommendations').then((res) => res.data),
 };
 
 export default api;
