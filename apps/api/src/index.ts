@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import multer from 'multer';
 import { createServer } from 'http';
+import { Server } from 'socket.io';
 import { swaggerUi } from './utils/swagger';
 import { errorHandler } from './middleware/errorHandler';
 import { authRouter } from './routes/auth';
@@ -20,9 +21,20 @@ import { homeRouter } from './routes/home';
 import { videoRouter } from './routes/videos';
 import { chatbotRouter } from './routes/chatbot';
 import { socialRouter } from './routes/social';
+import { liveSessionRouter } from './routes/liveSessions';
+import { initializeSocket } from './socket';
 
 const app = express();
 const httpServer = createServer(app);
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: process.env.CORS_ORIGIN || '*',
+    methods: ['GET', 'POST'],
+  },
+});
+
+initializeSocket(io);
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -67,6 +79,7 @@ app.use('/api/v1/home', homeRouter);
 app.use('/api/v1/videos', videoRouter);
 app.use('/api/v1/chatbot', chatbotRouter);
 app.use('/api/v1/social', socialRouter);
+app.use('/api/v1/live-sessions', liveSessionRouter);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

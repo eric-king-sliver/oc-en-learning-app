@@ -31,6 +31,20 @@ enum SCENARIO_CATEGORY {
   academic
 }
 
+enum SESSION_STATUS {
+  waiting
+  active
+  completed
+  cancelled
+}
+
+enum MATCH_OUTCOME {
+  win
+  loss
+  draw
+  abandoned
+}
+
 model User {
   id                 String           @id @default(uuid())
   email              String           @unique
@@ -56,6 +70,11 @@ model User {
   sharedProgress  SharedProgress[]
   offlineContent  OfflineContent[]
   conversations   ChatbotConversation[]
+  liveSessionsAs1 LiveSession[] @relation("LiveSessionUser1")
+  liveSessionsAs2 LiveSession[] @relation("LiveSessionUser2")
+  matchHistoryAs1 MatchHistory[] @relation("MatchHistoryUser1")
+  matchHistoryAs2 MatchHistory[] @relation("MatchHistoryUser2")
+  sessionMessages SessionMessage[]
 
   @@map("users")
 }
@@ -350,4 +369,60 @@ model OfflineContent {
 
   @@unique([userId, contentType, contentId])
   @@map("offline_content")
+}
+
+model LiveSession {
+  id          String         @id @default(uuid())
+  status      SESSION_STATUS @default(waiting)
+  scenarioId  String?        @map("scenario_id")
+  userId1     String         @map("user_id_1")
+  user1       User           @relation("LiveSessionUser1", fields: [userId1], references: [id], onDelete: Cascade)
+  userId2     String?        @map("user_id_2")
+  user2       User?          @relation("LiveSessionUser2", fields: [userId2], references: [id], onDelete: Cascade)
+  difficulty  CEFR_LEVEL
+  createdAt   DateTime       @default(now()) @map("created_at")
+  endedAt     DateTime?      @map("ended_at")
+  duration    Int?           @default(0)
+
+  matchHistory MatchHistory[]
+  messages     SessionMessage[]
+
+  @@index([userId1])
+  @@index([userId2])
+  @@index([status])
+  @@map("live_sessions")
+}
+
+model MatchHistory {
+  id          String        @id @default(uuid())
+  userId1     String        @map("user_id_1")
+  user1       User          @relation("MatchHistoryUser1", fields: [userId1], references: [id], onDelete: Cascade)
+  userId2     String        @map("user_id_2")
+  user2       User          @relation("MatchHistoryUser2", fields: [userId2], references: [id], onDelete: Cascade)
+  sessionId   String        @map("session_id")
+  session     LiveSession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  outcome     MATCH_OUTCOME
+  score1      Int           @default(0)
+  score2      Int           @default(0)
+  createdAt   DateTime      @default(now()) @map("created_at")
+
+  @@index([userId1])
+  @@index([userId2])
+  @@map("match_history")
+}
+
+model SessionMessage {
+  id          String      @id @default(uuid())
+  sessionId   String      @map("session_id")
+  session     LiveSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  senderId    String      @map("sender_id")
+  sender      User        @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  content     String
+  audioUrl    String?     @map("audio_url")
+  timestamp   DateTime    @default(now())
+  isRead      Boolean     @default(false) @map("is_read")
+
+  @@index([sessionId])
+  @@index([senderId])
+  @@map("session_messages")
 }
